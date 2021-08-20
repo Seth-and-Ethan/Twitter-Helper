@@ -18,6 +18,7 @@
   "scripts": {
     "start": "webpack serve --open --mode development --config webpack.config.js",
     "start-api": "cd api && venv\\Scripts\\activate && flask run",
+    "start-api-mac": "cd api && source venv/bin/activate && flask run",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
