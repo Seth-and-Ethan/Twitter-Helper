@@ -1,7 +1,54 @@
 import React, { useEffect, useState } from "react";
 import './Register.scss'
+import { checkAuth, setAuth } from '../../verifyLogin';
 
 const Register = () => {
+
+    const [usernameState, setUsernameState] = useState("")
+    const [passwordState, setPasswordState] = useState("")
+    const [confirmPasswordState, setConfirmPasswordState] = useState("")
+
+    const handleSubmit = () => {
+
+        if(passwordState === confirmPasswordState && usernameState !== ''){
+            const formData = new FormData();
+
+            formData.append('username', usernameState)
+            formData.append('password', passwordState)
+    
+            fetch(`${process.env.API_URL}/api/register`,
+            {
+              method: 'POST',
+              body: formData,
+            }
+          )
+            .then(res => {
+              if(!res.ok) {
+                console.log(res)
+                console.log(res.status)
+              }
+              if (res.status === 403) {
+                alert("Username taken!");
+                throw Error('Could not fetch the data for that resource');
+              }
+              return res.json();
+            })
+            .then(res => {
+              setAuth(res)
+              window.location.assign("/home")
+            })
+            .catch((error) => {
+              console.error('Error: ', error);
+            })
+        }
+        else if (passwordState !== confirmPasswordState){
+            alert("Passwords do not match")
+        }
+        else if (passwordState === ''){
+            alert("Password can not be blank")
+        }
+
+        };
 
     return(
         <div>
@@ -17,6 +64,8 @@ const Register = () => {
                             type="text"
                             name="username"
                             id="username"
+                            value={usernameState}
+                            onChange={(e)=>setUsernameState(e.target.value)}
                         />
                     </div>
                     <div className= "in">
@@ -25,6 +74,8 @@ const Register = () => {
                                 type="password"
                                 name="pass"
                                 id="pass"
+                                value = {passwordState}
+                                onChange={(e)=>setPasswordState(e.target.value)}
                             />
                     </div>
                         <div className ="in">
@@ -33,6 +84,8 @@ const Register = () => {
                                     type="password"
                                     name="pass"
                                     id="pass"
+                                    value = {confirmPasswordState}
+                                    onChange={(e)=>setConfirmPasswordState(e.target.value)}
                                 />
                         </div>
                 </div>
@@ -41,6 +94,7 @@ const Register = () => {
                         className="registerButton"
                         type= "button" 
                         value="Register"
+                        onClick={handleSubmit}
                     />
                 </div>
             </div>

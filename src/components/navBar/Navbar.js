@@ -25,7 +25,6 @@ const NavBar = () => {
                 Home
             </NavLink>
 
-
             <NavLink 
                 className='nav-item'
                 to="/profile"
