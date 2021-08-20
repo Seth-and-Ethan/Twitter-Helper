@@ -4,6 +4,7 @@ import { PrivateRoute } from "./verifyLogin"
 import Home from './components/Home/Home';
 import Login from './components/Login/Login'
 import Register from './components/Register/Register'
+import SentimentAnalysis from "./components/SentimentAnalysis/SentimentAnalysis";
 
 const App = () => {
 
@@ -14,6 +15,7 @@ const App = () => {
           <Redirect to="/home" />
         </Route>
         <PrivateRoute path="/home" component={Home} />
+        <PrivateRoute path="/analysis" component={SentimentAnalysis} />
         <Route path="/login" component={Login} />
         <Route path="/register" component={Register} />
       </Switch>

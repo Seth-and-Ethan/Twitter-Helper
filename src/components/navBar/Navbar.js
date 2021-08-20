@@ -24,7 +24,14 @@ const NavBar = () => {
                 }}>
                 Home
             </NavLink>
-
+            <NavLink 
+                className='nav-item'
+                to="/analysis"
+                activeStyle={{
+                    fontWeight: 800,
+                }}>
+                Sentiment Analysis
+            </NavLink>
             <NavLink 
                 className='nav-item'
                 to="/profile"
