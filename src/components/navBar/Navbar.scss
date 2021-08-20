@@ -1,0 +1,43 @@
+nav {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    min-height: 10vh;
+    background: rgb(29, 161, 242);
+    color: white;
+}
+
+.nav-item {
+    text-decoration: none;
+    color: white;
+    font-family: sans-serif;
+    font-size: 20px;
+}
+
+.nav-item:hover {
+    text-decoration: underline;
+    color: white;
+}
+
+.nav-links{
+    width: 60%;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+}
+
+
+.signout{
+    background:none;
+    border:none;
+    margin:0;
+    padding:0;
+    color: white;
+    font-family: sans-serif;
+    font-size: 20px;
+}
+
+.signout:hover{
+    text-decoration: underline;
+    color: white;
+}

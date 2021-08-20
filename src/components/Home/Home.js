@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from "react";
+import NavBar from "../navBar/Navbar";
 
 const Home = () => {
 
     return(
         <div>
-            <h1>Test</h1>
+            <NavBar></NavBar>
         </div>
     );
 }
