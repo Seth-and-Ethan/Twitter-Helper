@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { checkAuth, setAuth } from '../../verifyLogin';
-import { Redirect } from 'react-router-dom';
+import { Redirect, Link } from 'react-router-dom';
 import './Login.scss'
 
 const Login = () => {
@@ -85,6 +85,10 @@ const Login = () => {
                         onClick={handleLogin}
                     />
                 </div>
+            </div>
+            <div className="registerLink">
+                  <label>Don't have an Account? Create one{'\u00A0'}</label>
+                    <Link to="/register">here</Link>
             </div>
 
         </div>

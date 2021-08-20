@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import './Register.scss'
 import { checkAuth, setAuth } from '../../verifyLogin';
+import { Redirect, Link } from 'react-router-dom';
 
 const Register = () => {
 
@@ -100,6 +101,10 @@ const Register = () => {
             </div>
 
         </div>
+            <div className="loginLink">
+                    <label>Already have an account? Click{'\u00A0'}</label>
+                        <Link to="/login">here</Link>
+            </div>
         </div>
     );
 }
