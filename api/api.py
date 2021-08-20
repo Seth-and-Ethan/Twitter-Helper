@@ -3,6 +3,7 @@ import json
 from flask import Flask, request, session, json, make_response, jsonify
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.orm import relationship
 import pymysql
 import mysql
 from datetime import datetime, timedelta
@@ -26,6 +27,10 @@ twitterAPI = tw.API(auth, wait_on_rate_limit=True)
 
 db = SQLAlchemy(app)
 
+def jsonify_tweepy(tweepy_object):
+    json_str = json.dumps(tweepy_object._json)
+    return json.loads(json_str)
+
 def token_required(func):
   @wraps(func)
   def decorated(*args, **kwargs):
@@ -42,7 +47,12 @@ def token_required(func):
 
 class Usercredentials(db.Model):
   username = db.Column(db.String(25), primary_key=True)
-  password = db.Column(db.String(25))
+  password = db.Column(db.String(128))
+  information = relationship("Userinfo", backref = "Usercredentials", passive_deletes = True, uselist=False)
+
+class Userinfo(db.Model):
+  usercredentials_username = db.Column(db.String(20), db.ForeignKey('usercredentials.username', ondelete = "CASCADE"), primary_key=True)
+  password = db.Column(db.String(128))
 
 @app.route('/', methods=['GET'])
 def index():
@@ -84,11 +94,7 @@ def login_endpoint():
     if not user:
       return make_response('Unable to verify', 403, {'WWW-Authenticate': 'Basic realm: "Authentication failed!"'})
 
-    print(user.password)
-    print(password)
-
     hashed_password = generate_password_hash(password, method='sha256')
-    print(hashed_password)
     
     if check_password_hash(user.password, password):
       token = jwt.encode({
@@ -100,21 +106,39 @@ def login_endpoint():
 
     return make_response('Unable to verify', 403, {'WWW-Authenticate': 'Basic realm: "Authentication failed!"'})
 
-@app.route('/api/twitterAPITest', methods=['GET'])
+@app.route('/api/tweets', methods=['POST'])
 def test_endpoint():
-  userID = "POTUS"
-  tweets = twitterAPI.user_timeline(screen_name=userID, 
-                           # 200 is the maximum allowed count
-                           count=3,
-                           include_rts = False,
-                           # Necessary to keep full_text 
-                           # otherwise only the first 140 words are extracted
-                           tweet_mode = 'extended'
-                           )
-  for info in tweets[:3]:
-     print("ID: {}".format(info.id))
-     print(info.created_at)
-     print(info.full_text)
-     print("\n")
+  userID = request.form['twitterHandle']
+  numTweets = request.form['numTweets']
 
-  return "success"
+  try:
+    numTweets = int(numTweets)
+  except:
+    return jsonify({'Alert!': 'Error somewhere!'}), 400
+
+  if not userID == '' and numTweets > 0:
+    tweets = twitterAPI.user_timeline(screen_name=userID, 
+                            # 200 is the maximum allowed count
+                            count=numTweets,
+                            include_rts = False,
+                            # Necessary to keep full_text 
+                            # otherwise only the first 140 words are extracted
+                            tweet_mode = 'extended'
+                            )
+
+    tweetList = []
+    # for info in tweets[:3]:
+    #    print("ID: {}".format(info.id))
+    #    print(info.created_at)
+    #    print(info.full_text)
+    #    print("\n")
+
+    for info in tweets:
+      tweetList.append(info._json['full_text'])
+
+    for tweet in tweetList:
+      print(tweet)
+
+    return json.dumps(tweetList)
+  else:
+    return jsonify({'Alert!': 'Error somewhere!'}), 400

@@ -6,11 +6,65 @@ import NavBar from "../navBar/Navbar";
 const SentimentAnalysis = () => {
 
     const [usernameState, setUsernameState] = useState("")
+    const [numTweetsState, setNumTweetsState] = useState(0)
+
+    const handleSubmit = () => {
+        const formData = new FormData();
+
+        formData.append('twitterHandle', usernameState)
+        formData.append('numTweets', numTweetsState)
+
+        fetch(
+            `${process.env.API_URL}/api/tweets?token=${localStorage.getItem('token')}}`,
+            {
+              method: "POST",
+              body: formData,
+            }
+          )
+            .then((response) => response.json())
+            .then((result) => {
+              console.log("Success: ", result);
+              alert("Thank you!")
+            })
+            .catch((error) => {
+              console.error("Error: ", error);
+            });
+        };
 
     return(
         <div>
             <NavBar></NavBar>
-            
+            <div className="SAContainer">
+                <div>
+                    <label>Twitter Handle: </label>
+                    <input
+                        type="text"
+                        name="username"
+                        id="username"
+                        value = {usernameState}
+                        onChange={(e)=>setUsernameState(e.target.value)}
+                    />
+                </div>
+                <div>
+                    <label>Number of Tweets: </label>
+                    <input
+                        type="number"
+                        name="num"
+                        id="num"
+                        value = {numTweetsState}
+                        onChange={(e)=>setNumTweetsState(e.target.value)}
+                    />
+                </div>
+                <div className="button">
+                    <input 
+                        className="submitButton"
+                        type= "button" 
+                        value="Submit"
+                        onClick={handleSubmit}
+                    />
+                </div>
+
+            </div>
         </div>
     );
 }
