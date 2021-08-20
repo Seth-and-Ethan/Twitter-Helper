@@ -10,6 +10,8 @@ import jwt
 from functools import wraps
 from werkzeug.security import generate_password_hash, check_password_hash
 
+import tweepy as tw
+
 app = Flask(__name__)
 CORS(app)
 
@@ -17,6 +19,10 @@ app.config['SECRET_KEY'] = keys.secret_key
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://' + keys.mysql_user + ':' + keys.mysql_password + '@' + keys.mysql_host + '/' + keys.mysql_db_name
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
 app.config['SQLALCHEMY_ECHO'] = True
+
+auth = tw.OAuthHandler(keys.twitter_consumer_key, keys.twitter_consumer_secret_key)
+auth.set_access_token(keys.twitter_access_token, keys.twitter_access_token_secret)
+twitterAPI = tw.API(auth, wait_on_rate_limit=True)
 
 db = SQLAlchemy(app)
 
@@ -93,3 +99,22 @@ def login_endpoint():
       return {'token': token}
 
     return make_response('Unable to verify', 403, {'WWW-Authenticate': 'Basic realm: "Authentication failed!"'})
+
+@app.route('/api/twitterAPITest', methods=['GET'])
+def test_endpoint():
+  userID = "POTUS"
+  tweets = twitterAPI.user_timeline(screen_name=userID, 
+                           # 200 is the maximum allowed count
+                           count=3,
+                           include_rts = False,
+                           # Necessary to keep full_text 
+                           # otherwise only the first 140 words are extracted
+                           tweet_mode = 'extended'
+                           )
+  for info in tweets[:3]:
+     print("ID: {}".format(info.id))
+     print(info.created_at)
+     print(info.full_text)
+     print("\n")
+
+  return "success"
