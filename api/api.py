@@ -58,7 +58,7 @@ class Userinfo(db.Model):
 
 class Twitterdata(db.Model):
   count = db.Column(db.Integer, primary_key = True)
-  userinfo_ID = db.Column(db.Integer, db.ForeignKey('userinfo.ID', ondelete = "CASCADE"))
+  userinfo_ID = db.Column(db.Integer, db.ForeignKey('userinfo.id', ondelete = "CASCADE"))
   numTweet = db.Column(db.Integer)
   numFollower = db.Column(db.Integer)
   numFollowing = db.Column(db.Integer)
@@ -152,3 +152,47 @@ def test_endpoint():
     return json.dumps(tweetList)
   else:
     return jsonify({'Alert!': 'Error somewhere!'}), 400
+
+# @app.route('/api/userinfotest', methods=['GET'])
+# def userinfo_test_endpoint():
+#   # newUserInfo = Userinfo(usercredentials_username = "seth", twitterhandle = "Test2", )
+#   # db.session.merge(newUserInfo)
+#   # db.session.commit()
+
+#   newTwitterData = Twitterdata(userinfo_ID = 9, numTweet = 1, numFollower = 5, numFollowing = 5, dateRecorded = datetime.now())
+#   db.session.merge(newTwitterData)
+#   db.session.commit()
+#   return "success"
+
+@app.route('/api/profile', methods=['GET','POST'])
+def profile_endpoint():
+  username = request.values.get('username')
+  if request.method == 'GET':
+
+    dataToReturn = {
+        "handle": ""
+      }
+
+    user = Userinfo.query.filter_by(usercredentials_username = username).first()
+
+    if user:
+      print(user.twitterhandle)
+      dataToReturn["handle"] = user.twitterhandle
+
+    return json.dumps(dataToReturn)
+
+  if request.method == 'POST':
+    twitterhandle = request.form['twitterHandle']
+    user = Userinfo.query.filter_by(usercredentials_username = username).first()
+
+    if user: #Updates userinfo row
+      user.twitterhandle = twitterhandle
+      print("Updating User")
+    else: #Makes new userinfo row
+      newUserInfo = Userinfo(usercredentials_username = username, twitterhandle = twitterhandle)
+      print("Making new User")
+      db.session.merge(newUserInfo)
+
+    db.session.commit()
+    return "success"
+
