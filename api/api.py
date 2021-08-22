@@ -51,8 +51,18 @@ class Usercredentials(db.Model):
   information = relationship("Userinfo", backref = "Usercredentials", passive_deletes = True, uselist=False)
 
 class Userinfo(db.Model):
-  usercredentials_username = db.Column(db.String(20), db.ForeignKey('usercredentials.username', ondelete = "CASCADE"), primary_key=True)
-  password = db.Column(db.String(128))
+  id = db.Column(db.Integer, primary_key = True)
+  usercredentials_username = db.Column(db.String(20), db.ForeignKey('usercredentials.username', ondelete = "CASCADE"))
+  twitterhandle = db.Column(db.String(15))
+  twitterData = relationship("Twitterdata", backref="Userinfo", passive_deletes=True, uselist=True)
+
+class Twitterdata(db.Model):
+  count = db.Column(db.Integer, primary_key = True)
+  userinfo_ID = db.Column(db.Integer, db.ForeignKey('userinfo.ID', ondelete = "CASCADE"))
+  numTweet = db.Column(db.Integer)
+  numFollower = db.Column(db.Integer)
+  numFollowing = db.Column(db.Integer)
+  dateRecorded = db.Column(db.DateTime)
 
 @app.route('/', methods=['GET'])
 def index():
