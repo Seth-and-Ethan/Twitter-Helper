@@ -183,6 +183,12 @@ def profile_endpoint():
 
   if request.method == 'POST':
     twitterhandle = request.form['twitterHandle']
+
+    try:
+      twitterUser = twitterAPI.get_user(twitterhandle)
+    except:
+      return make_response("Username doesn't exist!", 403)
+
     user = Userinfo.query.filter_by(usercredentials_username = username).first()
 
     if user: #Updates userinfo row
@@ -195,4 +201,33 @@ def profile_endpoint():
 
     db.session.commit()
     return "success"
+
+@app.route('/api/home', methods=['GET'])
+def home_endpoint():
+  username = request.values.get('username')
+  if request.method == 'GET':
+
+    dataToReturn = {
+        "handle": "",
+        "numTweets": 0,
+        "numFollowing": 0,
+        "numFollowers": 0
+      }
+
+    user = Userinfo.query.filter_by(usercredentials_username = username).first()
+
+    if user:
+
+      try:
+        twitterUser = twitterAPI.get_user(user.twitterhandle)
+      except:
+        return make_response("Username doesn't exist!", 403)
+
+      dataToReturn["handle"] = user.twitterhandle
+      dataToReturn['numTweets'] = twitterUser.statuses_count
+      dataToReturn['numFollowing'] = twitterUser.friends_count
+      dataToReturn['numFollowers'] = twitterUser.followers_count
+
+    return json.dumps(dataToReturn)
+
 

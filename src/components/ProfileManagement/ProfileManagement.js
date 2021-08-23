@@ -29,21 +29,29 @@ const ProfileManagement = () => {
 
         formData.append('twitterHandle', twitterHandleState)
 
-        fetch(`${process.env.API_URL}/api/profile?token=${localStorage.getItem('token')}&username=${getUserId()}`,
-            {
-              method: "POST",
-              body: formData,
-            }
-          )
-            .then((response) => response.json())
-            .then((result) => {
-              console.log("Success: ", result);
-              alert("Thank you!")
-            })
-            .catch((error) => {
-              console.error("Error: ", error);
-            });
 
+        fetch(`${process.env.API_URL}/api/profile?token=${localStorage.getItem('token')}&username=${getUserId()}`,
+        {
+          method: 'POST',
+          body: formData,
+        }
+      )
+        .then(res => {
+          if(!res.ok) {
+            alert("Username does not exist")
+            throw Error("Could not fetch the data for that resource");
+          }
+          console.log("test")
+          return res
+        })
+        .then(res => {
+          console.log("Success: ", res);
+          alert("Success")
+          window.location.assign("/home")
+        })
+        .catch((error) => {
+          console.error('Error: ', error);
+        })
       }
 
 
