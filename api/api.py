@@ -1,4 +1,4 @@
-import keys
+import os
 import json
 from flask import Flask, request, session, json, make_response, jsonify
 from flask_cors import CORS
@@ -10,19 +10,18 @@ from datetime import datetime, timedelta
 import jwt
 from functools import wraps
 from werkzeug.security import generate_password_hash, check_password_hash
-
 import tweepy as tw
-
+from dotenv import load_dotenv
 app = Flask(__name__)
 CORS(app)
 
-app.config['SECRET_KEY'] = keys.secret_key
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://' + keys.mysql_user + ':' + keys.mysql_password + '@' + keys.mysql_host + '/' + keys.mysql_db_name
+app.config['SECRET_KEY'] = os.getenv('secret_key')
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://' + os.getenv('mysql_user') + ':' + os.getenv('mysql_password') + '@' + os.getenv('mysql_host') + '/' + os.getenv('mysql_db_name')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
 app.config['SQLALCHEMY_ECHO'] = True
 
-auth = tw.OAuthHandler(keys.twitter_consumer_key, keys.twitter_consumer_secret_key)
-auth.set_access_token(keys.twitter_access_token, keys.twitter_access_token_secret)
+auth = tw.OAuthHandler(os.getenv('twitter_consumer_key'), os.getenv('twitter_consumer_secret_key'))
+auth.set_access_token(os.getenv('twitter_access_token'), os.getenv('twitter_access_token_secret'))
 twitterAPI = tw.API(auth, wait_on_rate_limit=True)
 
 db = SQLAlchemy(app)
