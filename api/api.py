@@ -230,9 +230,7 @@ def home_endpoint():
       dataToReturn['numFollowers'] = twitterUser.followers_count
 
       twitterPic = twitterUser.profile_image_url
-      twitterPic = twitterPic[:len(twitterPic) - 11]
-      twitterPic = twitterPic + '.jpg'
-
+      twitterPic = twitterPic[:len(twitterPic) - 11] + '.jpg'
 
       dataToReturn['profilePicURL'] = twitterPic
 
