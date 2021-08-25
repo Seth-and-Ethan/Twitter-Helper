@@ -211,7 +211,8 @@ def home_endpoint():
         "handle": "",
         "numTweets": 0,
         "numFollowing": 0,
-        "numFollowers": 0
+        "numFollowers": 0,
+        "profilePicURL": ""
       }
 
     user = Userinfo.query.filter_by(usercredentials_username = username).first()
@@ -227,6 +228,13 @@ def home_endpoint():
       dataToReturn['numTweets'] = twitterUser.statuses_count
       dataToReturn['numFollowing'] = twitterUser.friends_count
       dataToReturn['numFollowers'] = twitterUser.followers_count
+
+      twitterPic = twitterUser.profile_image_url
+      twitterPic = twitterPic[:len(twitterPic) - 11]
+      twitterPic = twitterPic + '.jpg'
+
+
+      dataToReturn['profilePicURL'] = twitterPic
 
     return json.dumps(dataToReturn)
 

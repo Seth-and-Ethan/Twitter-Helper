@@ -5,9 +5,10 @@ import { getUserId } from "../../verifyLogin";
 const Home = () => {
 
     const [twitterHandleState, setTwitterHandle] = useState("")
-    const [numTweets, setNumTweets] = useState(0)
-    const [numFollowing, setNumFollowing] = useState(0)
-    const [numFollowers, setNumFollowers] = useState(0)
+    const [numTweets, setNumTweets] = useState()
+    const [numFollowing, setNumFollowing] = useState()
+    const [numFollowers, setNumFollowers] = useState()
+    const [profilePicURL, setProfilePic] = useState("")
 
     useEffect(() => {
     fetch(`${process.env.API_URL}/api/home?token=${localStorage.getItem('token')}&username=${getUserId()}`,
@@ -18,8 +19,11 @@ const Home = () => {
     .then((response) => response.json())
     .then((result) => {
       console.log('Success: ', result);
-      
-
+      setTwitterHandle(result.handle)
+      setNumFollowers(result.numFollowers)
+      setNumFollowing(result.numFollowing)
+      setNumTweets(result.numTweets)
+      setProfilePic(result.profilePicURL)
     })
     .catch((error) => {
       console.log('Error: ', error.response.data);
@@ -29,6 +33,11 @@ const Home = () => {
     return(
         <div>
             <NavBar></NavBar>
+            <p>{twitterHandleState}</p>
+            <p>{numTweets}</p>
+            <p>{numFollowing}</p>
+            <p>{numFollowers}</p>
+            <img src= {profilePicURL}></img>
         </div>
     );
 }
