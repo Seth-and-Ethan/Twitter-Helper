@@ -10,6 +10,8 @@ from datetime import datetime, timedelta
 import jwt
 from functools import wraps
 from werkzeug.security import generate_password_hash, check_password_hash
+import requests
+from requests_oauthlib import OAuth1Session
 
 import tweepy as tw
 
@@ -20,12 +22,50 @@ app.config['SECRET_KEY'] = keys.secret_key
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://' + keys.mysql_user + ':' + keys.mysql_password + '@' + keys.mysql_host + '/' + keys.mysql_db_name
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
 app.config['SQLALCHEMY_ECHO'] = True
+TWITTER_REQUEST_TOKEN_URL = "https://api.twitter.com/oauth/request_token"
+TWITTER_ACCESS_TOKEN_URL = "https://api.twitter.com/oauth/access_token"
 
 auth = tw.OAuthHandler(keys.twitter_consumer_key, keys.twitter_consumer_secret_key)
 auth.set_access_token(keys.twitter_access_token, keys.twitter_access_token_secret)
 twitterAPI = tw.API(auth, wait_on_rate_limit=True)
 
 db = SQLAlchemy(app)
+
+@app.route("/request_token")
+def request_oauth_token():
+    request_token = OAuth1Session(
+        client_key=keys.twitter_consumer_key, client_secret=keys.twitter_consumer_secret_key, callback_uri="http://localhost:8080/api/oauth"
+    )
+    data = request_token.get(TWITTER_REQUEST_TOKEN_URL)
+    print(data)
+    if data.status_code == 200:
+        request_token = str.split(data.text, '&')
+        oauth_token = str.split(request_token[0], '=')[1]
+        oauth_callback_confirmed = str.split(request_token[2], '=')[1]
+        return {
+            "oauth_token": oauth_token,
+            "oauth_callback_confirmed": oauth_callback_confirmed,
+        }
+    else:
+        return {
+            "oauth_token": None,
+            "oauth_callback_confirmed": "false",
+        }
+
+@app.route("/access_token")
+def request_access_token():
+    oauth_token = OAuth1Session(
+        client_key=keys.twitter_consumer_key,
+        client_secret=keys.twitter_consumer_secret_key,
+        resource_owner_key=request.args.get("oauth_token"),
+    )
+    data = {"oauth_verifier": request.args.get("oauth_verifier")}
+    response = oauth_token.post(TWITTER_ACCESS_TOKEN_URL, data=data)
+    access_token = str.split(response.text, '&')
+    access_token_key = str.split(access_token[0], '=')[1]
+    access_token_secret = str.split(access_token[1], '=')[1]
+    print(access_token)
+    return {"token": access_token}
 
 def jsonify_tweepy(tweepy_object):
     json_str = json.dumps(tweepy_object._json)
