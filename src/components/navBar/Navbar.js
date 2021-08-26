@@ -32,14 +32,6 @@ const NavBar = () => {
                 }}>
                 Sentiment Analysis
             </NavLink>
-            <NavLink 
-                className='nav-item'
-                to="/profile"
-                activeStyle={{
-                    fontWeight: 800,
-                }}>
-                Profile Management
-            </NavLink>
             <button
                 className='signout'
                 onClick={logout}

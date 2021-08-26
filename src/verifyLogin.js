@@ -29,7 +29,7 @@ export const checkAuth = () => {
     let expirationMS = new Date(decodedToken['expiration']).getTime();
     let currentMS = new Date().getTime();
 
-    if (!(decodedToken['username'] && decodedToken['expiration'])) {
+    if (!(decodedToken['access_token_key'] && decodedToken['expiration'])) {
       return false; 
     } else if (currentMS > expirationMS) {
       return false;

@@ -37,7 +37,6 @@ def request_oauth_token():
         client_key=keys.twitter_consumer_key, client_secret=keys.twitter_consumer_secret_key, callback_uri="http://localhost:8080/api/oauth"
     )
     data = request_token.get(TWITTER_REQUEST_TOKEN_URL)
-    print(data)
     if data.status_code == 200:
         request_token = str.split(data.text, '&')
         oauth_token = str.split(request_token[0], '=')[1]
@@ -52,20 +51,26 @@ def request_oauth_token():
             "oauth_callback_confirmed": "false",
         }
 
-@app.route("/access_token")
+@app.route("/access_token", methods = ['POST'])
 def request_access_token():
     oauth_token = OAuth1Session(
         client_key=keys.twitter_consumer_key,
         client_secret=keys.twitter_consumer_secret_key,
-        resource_owner_key=request.args.get("oauth_token"),
+        resource_owner_key=request.form["oauth_token"],
     )
-    data = {"oauth_verifier": request.args.get("oauth_verifier")}
+    data = {"oauth_verifier": request.form["oauth_verifier"]}
     response = oauth_token.post(TWITTER_ACCESS_TOKEN_URL, data=data)
     access_token = str.split(response.text, '&')
     access_token_key = str.split(access_token[0], '=')[1]
     access_token_secret = str.split(access_token[1], '=')[1]
-    print(access_token)
-    return {"token": access_token}
+
+    token = jwt.encode({
+      'access_token_key': access_token_key,
+      'access_token_secret': access_token_secret,
+      'expiration': str(datetime.utcnow() + timedelta(minutes=30)),
+    }, app.config['SECRET_KEY'])
+
+    return {'token': token}
 
 def jsonify_tweepy(tweepy_object):
     json_str = json.dumps(tweepy_object._json)
@@ -107,54 +112,6 @@ class Twitterdata(db.Model):
 @app.route('/', methods=['GET'])
 def index():
   return "This returns something."
-
-@app.route('/api/register', methods=['GET', 'POST'])
-def register_endpoint():
-  if request.method == 'POST':
-    username = request.form['username']
-    password = request.form['password']
-
-    hashed_password = generate_password_hash(password, method='sha256')
-
-    user = Usercredentials.query.filter_by(username=username).first()
-
-    if user:
-       return make_response('Username taken!', 403)
-
-    newUser = Usercredentials(username = username, password = hashed_password)
-
-    db.session.merge(newUser)
-    db.session.commit()
-    
-    token = jwt.encode({
-      'username': request.form['username'],
-      'expiration': str(datetime.utcnow() + timedelta(minutes=30)),
-    }, app.config['SECRET_KEY'])
-
-    return {'token': token}
-
-@app.route('/api/login', methods=['GET', 'POST'])
-def login_endpoint():
-  if request.method == 'POST':
-    username = request.form['username']
-    password = request.form['password']
-
-    user = Usercredentials.query.filter_by(username=username).first()
-
-    if not user:
-      return make_response('Unable to verify', 403, {'WWW-Authenticate': 'Basic realm: "Authentication failed!"'})
-
-    hashed_password = generate_password_hash(password, method='sha256')
-    
-    if check_password_hash(user.password, password):
-      token = jwt.encode({
-      'username': request.form['username'],
-      'expiration': str(datetime.utcnow() + timedelta(minutes=30)),
-      }, app.config['SECRET_KEY'])
-
-      return {'token': token}
-
-    return make_response('Unable to verify', 403, {'WWW-Authenticate': 'Basic realm: "Authentication failed!"'})
 
 @app.route('/api/tweets', methods=['POST'])
 def test_endpoint():
@@ -244,27 +201,28 @@ def profile_endpoint():
 
 @app.route('/api/home', methods=['GET'])
 def home_endpoint():
-  username = request.values.get('username')
+  token = request.values.get('token')
+  decodedToken = jwt.decode(token, app.config['SECRET_KEY'], algorithms=["HS256"])
+  twitter_access_token = decodedToken['access_token_key']
+  twitter_access_token_secret = decodedToken['access_token_secret']
+  auth.set_access_token(twitter_access_token, twitter_access_token_secret)
+  
+
   if request.method == 'GET':
 
-    dataToReturn = {
-        "handle": "",
-        "numTweets": 0,
-        "numFollowing": 0,
-        "numFollowers": 0,
-        "profilePicURL": ""
-      }
-
-    user = Userinfo.query.filter_by(usercredentials_username = username).first()
-
-    if user:
+      dataToReturn = {
+          "handle": "",
+          "numTweets": 0,
+          "numFollowing": 0,
+          "numFollowers": 0,
+          "profilePicURL": ""
+        }
 
       try:
-        twitterUser = twitterAPI.get_user(user.twitterhandle)
+        twitterUser = twitterAPI.me()
       except:
         return make_response("Username doesn't exist!", 403)
 
-      dataToReturn["handle"] = user.twitterhandle
       dataToReturn['numTweets'] = twitterUser.statuses_count
       dataToReturn['numFollowing'] = twitterUser.friends_count
       dataToReturn['numFollowers'] = twitterUser.followers_count
@@ -274,6 +232,6 @@ def home_endpoint():
 
       dataToReturn['profilePicURL'] = twitterPic
 
-    return json.dumps(dataToReturn)
+      return json.dumps(dataToReturn)
 
 

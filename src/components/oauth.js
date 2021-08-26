@@ -1,21 +1,25 @@
 import React, { useEffect, useState } from "react";
-import { Redirect, Link } from 'react-router-dom';
+import { Redirect, Link, useParams } from 'react-router-dom';
+import { checkAuth, setAuth } from '../verifyLogin';
 
 const oauths = () => {
 
     useEffect(() => {
-        console.log("test")
-        const querystring = window.location.search;
-        const urlParams = new URLSearchParams(querystring)
-        oauth_token = urlParams.get('oauth_token')
-        oauth_verifier = urlParams.get('oauth_verifier')
+
+      if(!checkAuth()){
+        const queryString = window.location.search;
+
+        const urlParams = new URLSearchParams(queryString);
+
+        const oauth = urlParams.get('oauth_token')
+        const oauthVerifier = urlParams.get('oauth_verifier')
+
 
         const formData = new FormData();
-        formData.append("oauth_token", oauth_token)
-        formData.append("oauth_verifier", oauth_verifier)
+        formData.append("oauth_token", oauth)
+        formData.append("oauth_verifier", oauthVerifier)
 
-
-        fetch(`${process.env.API_URL}/request_token`, {
+        fetch(`${process.env.API_URL}/access_token`, {
             method: 'POST',
             body: formData
           })
@@ -24,10 +28,15 @@ const oauths = () => {
             })
             .then(res => {
               console.log(res)
+              setAuth(res)
+              window.location.replace("/home")
+
             })
             .catch(error => {
               console.log(error);
             })
+      }
+
       }, [])
 
 

@@ -10,42 +10,21 @@ const Login = () => {
 
     const handleLogin = () => {
 
-        const formData = new FormData();
-        formData.append("username", usernameState)
-        formData.append("password", passwordState)
 
-        console.log(usernameState)
-        console.log(passwordState)
-
-        fetch(`${process.env.API_URL}/api/login`, {
-            method: 'POST',
-            body: formData,
+        fetch(`${process.env.API_URL}/request_token`, {
+            method: 'GET',
           })
             .then(res => {
-              if(!res.ok) {
-                alert("Invalid username/password!");
-                throw Error('Could not fetch the data for that resource');
-              }
-              if (res.status != 200) {
-                alert("Invalid username/password!");
-              }
               return res.json();
             })
             .then(res => {
-              setAuth(res)
-              window.location.assign("/home")
+              console.log(res)
+              window.location.assign(`https://api.twitter.com/oauth/authenticate?oauth_token=${res.oauth_token}`)
             })
             .catch(error => {
               console.log(error);
-              setError(true);
             })
 
-
-            if (checkAuth()) {
-                return (
-                  <Redirect to='/home' />
-                )
-              }
     }
 
     return(
@@ -56,26 +35,6 @@ const Login = () => {
             <h1>Login</h1>
             </div>
                 <div className="formbox">
-                <div className= "in">
-                    <label>Username:</label>
-                    <input className="usernameInput"
-                        type="text"
-                        name="username"
-                        id="username"
-                        value={usernameState}
-                        onChange={(e)=>setUsernameState(e.target.value)}
-                    />
-                </div>
-                <div className= "in">
-                    <label>Password:</label>
-                        <input className="add"
-                            type="password"
-                            name="pass"
-                            id="pass"
-                            value={passwordState}
-                            onChange={(e)=>setPasswordState(e.target.value)}
-                        />
-                </div>
                 </div>
                 <div className="button">
                     <input 
@@ -86,10 +45,7 @@ const Login = () => {
                     />
                 </div>
             </div>
-            <div className="registerLink">
-                  <label>Don't have an Account? Create one{'\u00A0'}</label>
-                    <Link to="/register">here</Link>
-            </div>
+  
 
         </div>
         </div>
