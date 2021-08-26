@@ -19,7 +19,7 @@ const Login = () => {
             })
             .then(res => {
               console.log(res)
-              window.location.assign(`https://api.twitter.com/oauth/authenticate?oauth_token=${res.oauth_token}`)
+              window.location.assign(`https://api.twitter.com/oauth/authenticate?force_login=true&oauth_token=${res.oauth_token}`)
             })
             .catch(error => {
               console.log(error);

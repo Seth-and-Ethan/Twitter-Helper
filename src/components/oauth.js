@@ -39,6 +39,10 @@ const oauths = () => {
 
       }, [])
 
+      if(checkAuth()){
+        window.location.replace("/home")
+      }
+
 
 
     return(

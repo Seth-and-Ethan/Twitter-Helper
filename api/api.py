@@ -24,6 +24,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
 app.config['SQLALCHEMY_ECHO'] = True
 TWITTER_REQUEST_TOKEN_URL = "https://api.twitter.com/oauth/request_token"
 TWITTER_ACCESS_TOKEN_URL = "https://api.twitter.com/oauth/access_token"
+TWITTER_ACCESS_AUTHENTICATE_URL = "https://api.twitter.com/oauth/authenticate"
 
 auth = tw.OAuthHandler(keys.twitter_consumer_key, keys.twitter_consumer_secret_key)
 auth.set_access_token(keys.twitter_access_token, keys.twitter_access_token_secret)
