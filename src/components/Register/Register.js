@@ -2,24 +2,9 @@ import React, { useEffect, useState } from "react";
 import './Register.scss'
 import { checkAuth, setAuth } from '../../verifyLogin';
 import { Redirect, Link } from 'react-router-dom';
+import { getRequestToken } from "../../twitterTokens";
 
 const Register = () => {
-
-    const getRequestToken = () => {
-            fetch(`${process.env.API_URL}/request_token`, {
-                method: 'POST',
-              })
-                .then(res => {
-                  return res.json();
-                })
-                .then(res => {
-                  console.log(res)
-                  window.location.assign(`https://api.twitter.com/oauth/authenticate?force_login=true&oauth_token=${res.oauth_token}`)
-                })
-                .catch(error => {
-                  console.log(error);
-                })
-    }
 
     const [usernameState, setUsernameState] = useState("")
     const [passwordState, setPasswordState] = useState("")

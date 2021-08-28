@@ -6,7 +6,6 @@ const oauths = () => {
 
     useEffect(() => {
 
-      if(!checkAuth()){
         const queryString = window.location.search;
 
         const urlParams = new URLSearchParams(queryString);
@@ -36,7 +35,6 @@ const oauths = () => {
             .catch(error => {
               console.log(error);
             })
-      }
       }, [])
 
 

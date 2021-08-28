@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import NavBar from "../navBar/Navbar";
 import { getUserId } from "../../verifyLogin";
+import { getRequestToken } from "../../twitterTokens";
 
 const Home = () => {
 
@@ -16,7 +17,12 @@ const Home = () => {
       method: 'GET',
     }
     )
-    .then((response) => response.json())
+    .then((response) => {
+      if(response.status == 403){
+        getRequestToken()
+      }
+      return response.json()
+    })
     .then((result) => {
       console.log('Success: ', result);
       setTwitterHandle(result.handle)

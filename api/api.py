@@ -128,7 +128,7 @@ def token_required(func):
 def index():
   return "This returns something."
 
-@app.route('/api/register', methods=['GET', 'POST'])
+@app.route('/api/register', methods=['POST'])
 def register_endpoint():
   if request.method == 'POST':
     username = request.form['username']
