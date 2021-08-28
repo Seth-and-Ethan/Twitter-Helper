@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Redirect, Link, useParams } from 'react-router-dom';
-import { checkAuth, setAuth } from '../verifyLogin';
+import { checkAuth, setAuth, getUserId, getOauth } from '../verifyLogin';
 
 const oauths = () => {
 
@@ -19,7 +19,8 @@ const oauths = () => {
         formData.append("oauth_token", oauth)
         formData.append("oauth_verifier", oauthVerifier)
 
-        fetch(`${process.env.API_URL}/access_token`, {
+
+        fetch(`${process.env.API_URL}/access_token?username=${getUserId()}`, {
             method: 'POST',
             body: formData
           })
@@ -36,12 +37,8 @@ const oauths = () => {
               console.log(error);
             })
       }
-
       }, [])
 
-      if(checkAuth()){
-        window.location.replace("/home")
-      }
 
 
 

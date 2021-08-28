@@ -24,7 +24,6 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
 app.config['SQLALCHEMY_ECHO'] = True
 TWITTER_REQUEST_TOKEN_URL = "https://api.twitter.com/oauth/request_token"
 TWITTER_ACCESS_TOKEN_URL = "https://api.twitter.com/oauth/access_token"
-TWITTER_ACCESS_AUTHENTICATE_URL = "https://api.twitter.com/oauth/authenticate"
 
 auth = tw.OAuthHandler(keys.twitter_consumer_key, keys.twitter_consumer_secret_key)
 auth.set_access_token(keys.twitter_access_token, keys.twitter_access_token_secret)
@@ -32,7 +31,27 @@ twitterAPI = tw.API(auth, wait_on_rate_limit=True)
 
 db = SQLAlchemy(app)
 
-@app.route("/request_token")
+class Usercredentials(db.Model):
+  username = db.Column(db.String(25), primary_key=True)
+  password = db.Column(db.String(128))
+  information = relationship("Userinfo", backref = "Usercredentials", passive_deletes = True, uselist=False)
+
+class Userinfo(db.Model):
+  id = db.Column(db.Integer, primary_key = True)
+  usercredentials_username = db.Column(db.String(25), db.ForeignKey('usercredentials.username', ondelete = "CASCADE"))
+  oauth = db.Column(db.String(45))
+  oauthsecret = db.Column(db.String(45))
+  twitterData = relationship("Twitterdata", backref="Userinfo", passive_deletes=True, uselist=True)
+
+class Twitterdata(db.Model):
+  count = db.Column(db.Integer, primary_key = True)
+  userinfo_ID = db.Column(db.Integer, db.ForeignKey('userinfo.id', ondelete = "CASCADE"))
+  numTweet = db.Column(db.Integer)
+  numFollower = db.Column(db.Integer)
+  numFollowing = db.Column(db.Integer)
+  dateRecorded = db.Column(db.DateTime)
+
+@app.route("/request_token", methods=['POST'])
 def request_oauth_token():
     request_token = OAuth1Session(
         client_key=keys.twitter_consumer_key, client_secret=keys.twitter_consumer_secret_key, callback_uri="http://localhost:8080/api/oauth"
@@ -54,6 +73,7 @@ def request_oauth_token():
 
 @app.route("/access_token", methods = ['POST'])
 def request_access_token():
+    username = request.values.get('username')
     oauth_token = OAuth1Session(
         client_key=keys.twitter_consumer_key,
         client_secret=keys.twitter_consumer_secret_key,
@@ -65,11 +85,23 @@ def request_access_token():
     access_token_key = str.split(access_token[0], '=')[1]
     access_token_secret = str.split(access_token[1], '=')[1]
 
+    userInfo = Userinfo.query.filter_by(usercredentials_username=username).first()
+
+    if userInfo:
+      userInfo.oauth = access_token_key
+      userInfo.oauth = access_token_secret
+      db.session.commit()
+    else:
+      newUserInfo = Userinfo(usercredentials_username = username, oauth = access_token_key, oauthsecret = access_token_secret)
+      db.session.merge(newUserInfo)
+      db.session.commit()
+
     token = jwt.encode({
-      'access_token_key': access_token_key,
-      'access_token_secret': access_token_secret,
-      'expiration': str(datetime.utcnow() + timedelta(minutes=30)),
-    }, app.config['SECRET_KEY'])
+          'username': username,
+          'expiration': str(datetime.utcnow() + timedelta(minutes=30)),
+          'oauth': access_token_key,
+          'oauthsecret': access_token_secret,
+          }, app.config['SECRET_KEY'])
 
     return {'token': token}
 
@@ -91,28 +123,69 @@ def token_required(func):
 
   return decorated
 
-class Usercredentials(db.Model):
-  username = db.Column(db.String(25), primary_key=True)
-  password = db.Column(db.String(128))
-  information = relationship("Userinfo", backref = "Usercredentials", passive_deletes = True, uselist=False)
-
-class Userinfo(db.Model):
-  id = db.Column(db.Integer, primary_key = True)
-  usercredentials_username = db.Column(db.String(20), db.ForeignKey('usercredentials.username', ondelete = "CASCADE"))
-  twitterhandle = db.Column(db.String(15))
-  twitterData = relationship("Twitterdata", backref="Userinfo", passive_deletes=True, uselist=True)
-
-class Twitterdata(db.Model):
-  count = db.Column(db.Integer, primary_key = True)
-  userinfo_ID = db.Column(db.Integer, db.ForeignKey('userinfo.id', ondelete = "CASCADE"))
-  numTweet = db.Column(db.Integer)
-  numFollower = db.Column(db.Integer)
-  numFollowing = db.Column(db.Integer)
-  dateRecorded = db.Column(db.DateTime)
 
 @app.route('/', methods=['GET'])
 def index():
   return "This returns something."
+
+@app.route('/api/register', methods=['GET', 'POST'])
+def register_endpoint():
+  if request.method == 'POST':
+    username = request.form['username']
+    password = request.form['password']
+
+    hashed_password = generate_password_hash(password, method='sha256')
+
+    user = Usercredentials.query.filter_by(username=username).first()
+
+    if user:
+       return make_response('Username taken!', 403)
+
+    newUser = Usercredentials(username = username, password = hashed_password)
+
+    db.session.merge(newUser)
+    db.session.commit()
+    
+    token = jwt.encode({
+      'username': request.form['username'],
+      'expiration': str(datetime.utcnow() + timedelta(minutes=30)),
+    }, app.config['SECRET_KEY'])
+
+    return {'token': token}
+
+@app.route('/api/login', methods=['GET', 'POST'])
+def login_endpoint():
+  if request.method == 'POST':
+    username = request.form['username']
+    password = request.form['password']
+
+    user = Usercredentials.query.filter_by(username=username).first()
+
+    if not user:
+      return make_response('Unable to verify', 403, {'WWW-Authenticate': 'Basic realm: "Authentication failed!"'})
+
+    hashed_password = generate_password_hash(password, method='sha256')
+    
+    if check_password_hash(user.password, password):
+      info = Userinfo.query.filter_by(usercredentials_username=username).first()
+
+      if info:
+        token = jwt.encode({
+        'username': username,
+        'expiration': str(datetime.utcnow() + timedelta(minutes=30)),
+        'oauth': info.oauth,
+        'oauthsecret': info.oauthsecret
+        }, app.config['SECRET_KEY'])
+        print("returning the right one")
+      else:
+        token = jwt.encode({
+        'username': username,
+        'expiration': str(datetime.utcnow() + timedelta(minutes=30)),
+        }, app.config['SECRET_KEY'])
+
+      return {'token': token}
+
+    return make_response('Unable to verify', 403, {'WWW-Authenticate': 'Basic realm: "Authentication failed!"'})
 
 @app.route('/api/tweets', methods=['POST'])
 def test_endpoint():
@@ -162,52 +235,13 @@ def test_endpoint():
 #   db.session.commit()
 #   return "success"
 
-@app.route('/api/profile', methods=['GET','POST'])
-def profile_endpoint():
-  username = request.values.get('username')
-  if request.method == 'GET':
-
-    dataToReturn = {
-        "handle": ""
-      }
-
-    user = Userinfo.query.filter_by(usercredentials_username = username).first()
-
-    if user:
-      print(user.twitterhandle)
-      dataToReturn["handle"] = user.twitterhandle
-
-    return json.dumps(dataToReturn)
-
-  if request.method == 'POST':
-    twitterhandle = request.form['twitterHandle']
-
-    try:
-      twitterUser = twitterAPI.get_user(twitterhandle)
-    except:
-      return make_response("Username doesn't exist!", 403)
-
-    user = Userinfo.query.filter_by(usercredentials_username = username).first()
-
-    if user: #Updates userinfo row
-      user.twitterhandle = twitterhandle
-      print("Updating User")
-    else: #Makes new userinfo row
-      newUserInfo = Userinfo(usercredentials_username = username, twitterhandle = twitterhandle)
-      print("Making new User")
-      db.session.merge(newUserInfo)
-
-    db.session.commit()
-    return "success"
-
 @app.route('/api/home', methods=['GET'])
 def home_endpoint():
   token = request.values.get('token')
   decodedToken = jwt.decode(token, app.config['SECRET_KEY'], algorithms=["HS256"])
-  twitter_access_token = decodedToken['access_token_key']
-  twitter_access_token_secret = decodedToken['access_token_secret']
+  twitter_access_token = decodedToken['oauth']
+  twitter_access_token_secret = decodedToken['oauthsecret']
   auth.set_access_token(twitter_access_token, twitter_access_token_secret)
-  
 
   if request.method == 'GET':
 

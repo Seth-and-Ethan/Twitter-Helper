@@ -11,7 +11,7 @@ const Home = () => {
     const [profilePicURL, setProfilePic] = useState("")
 
     useEffect(() => {
-    fetch(`${process.env.API_URL}/api/home?token=${localStorage.getItem('token')}&username=${getUserId()}`,
+    fetch(`${process.env.API_URL}/api/home?token=${localStorage.getItem('token')}`,
     {
       method: 'GET',
     }

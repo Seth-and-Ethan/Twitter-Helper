@@ -1,0 +1,55 @@
+.register {
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+    margin-top: 5%;
+  
+    &__container {
+      border-radius: 15px;
+      width: 25%;
+      margin: auto;
+      color: black;
+      text-align: left;
+      border: black solid .5px;
+      background-color: whitesmoke;
+      border: 1px solid black;
+    }
+  }
+  .title {
+    padding-top: 10px;
+    padding-left: 50px;
+  }
+  .in {
+    display: flex;
+    flex-direction: column;
+    padding-left: 50px;
+    padding-right: 50px;
+    padding-bottom: 15px;
+  }
+  .button {
+    padding-top: 10px;
+    display: flex;
+    padding-left: 50px;
+    padding-right: 50px;
+    padding-bottom: 10px;
+  }
+  .registerButton {
+    width: 100%;
+    color: #fff;
+    background-color: rgb(29, 161, 242);
+    margin-bottom: 15px;
+    border-radius: 12px;
+    font-size: 16px;
+    line-height: 30px;
+    transition: all 0.3s;
+  }
+  .registerButton:hover:enabled {
+    background: #fff;
+    color: rgb(29, 161, 242);
+    box-shadow: 0 4px 4px rgba(83, 100, 255, 0.32);
+  }
+  .loginLink{
+    padding-top: 10px;
+    display: flex;
+    justify-content: center;
+  }
