@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import NavBar from "../navBar/Navbar";
 import { getUserId } from "../../verifyLogin";
 import { getRequestToken } from "../../twitterTokens";
+import "./Home.scss"
 
 const Home = () => {
 
@@ -43,7 +44,7 @@ const Home = () => {
             <p>{numTweets}</p>
             <p>{numFollowing}</p>
             <p>{numFollowers}</p>
-            <img src= {profilePicURL}></img>
+            <img className= "picture" src= {profilePicURL}></img>
         </div>
     );
 }
