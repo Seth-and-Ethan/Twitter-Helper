@@ -250,7 +250,8 @@ def home_endpoint():
           "numTweets": 0,
           "numFollowing": 0,
           "numFollowers": 0,
-          "profilePicURL": ""
+          "profilePicURL": "",
+          "tweets": []
         }
 
       try:
@@ -258,14 +259,36 @@ def home_endpoint():
       except:
         return make_response("Username doesn't exist!", 403)
 
+      dataToReturn['handle'] = twitterUser.screen_name
       dataToReturn['numTweets'] = twitterUser.statuses_count
       dataToReturn['numFollowing'] = twitterUser.friends_count
       dataToReturn['numFollowers'] = twitterUser.followers_count
 
       twitterPic = twitterUser.profile_image_url
-      twitterPic = twitterPic[:len(twitterPic) - 11] + '.jpg'
 
+      twitterPic = twitterPic[:len(twitterPic) - 11] + '.jpg'
       dataToReturn['profilePicURL'] = twitterPic
+
+      tweets = twitterAPI.user_timeline(screen_name=twitterUser.screen_name, 
+                                  # 200 is the maximum allowed count
+                                  count=20,
+                                  include_rts = False,
+                                  # Necessary to keep full_text 
+                                  # otherwise only the first 140 words are extracted
+                                  tweet_mode = 'extended'
+                                  )
+
+      tweetList = []
+          # for info in tweets[:3]:
+          #    print("ID: {}".format(info.id))
+          #    print(info.created_at)
+          #    print(info.full_text)
+          #    print("\n")
+
+      for info in tweets:
+        tweetList.append(info._json['full_text'])
+
+      dataToReturn['tweets']= tweetList
 
       return json.dumps(dataToReturn)
 

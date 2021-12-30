@@ -11,6 +11,7 @@ const Home = () => {
     const [numFollowing, setNumFollowing] = useState()
     const [numFollowers, setNumFollowers] = useState()
     const [profilePicURL, setProfilePic] = useState("")
+    const [tweets, setTweets] = useState([])
 
     useEffect(() => {
     fetch(`${process.env.API_URL}/api/home?token=${localStorage.getItem('token')}`,
@@ -31,6 +32,7 @@ const Home = () => {
       setNumFollowing(result.numFollowing)
       setNumTweets(result.numTweets)
       setProfilePic(result.profilePicURL)
+      setTweets(result.tweets)
     })
     .catch((error) => {
       console.log('Error: ', error.response.data);
@@ -40,11 +42,26 @@ const Home = () => {
     return(
         <div>
             <NavBar></NavBar>
-            <p>{twitterHandleState}</p>
-            <p>{numTweets}</p>
-            <p>{numFollowing}</p>
-            <p>{numFollowers}</p>
-            <img className= "picture" src= {profilePicURL}></img>
+            <div className="twitterHeader">
+              <img className= "picture" src= {profilePicURL}></img>
+              <h1 className="handle">{twitterHandleState}</h1>
+            </div>
+            <div className="twitterInfoContainer">
+              <div className="twitterInfo">
+                <p>Following: {numFollowing}</p>
+              </div>
+              <div className="twitterInfo">
+                <p>Followers: {numFollowers}</p>
+              </div>
+            </div>
+            <div className= "tweetContainer">
+              <h2>Tweets</h2>
+              <div className = "tweets">
+              {tweets.map((tweet, index) => (
+              <p key={index}>{tweet}</p>
+              ))}
+              </div>
+            </div>
         </div>
     );
 }
