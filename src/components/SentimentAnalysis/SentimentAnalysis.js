@@ -35,7 +35,7 @@ const SentimentAnalysis = () => {
         <div>
             <NavBar></NavBar>
             <div className="SAContainer">
-                <div>
+                <div className = "SAInput">
                     <label>Twitter Handle: </label>
                     <input
                         type="text"
@@ -45,7 +45,7 @@ const SentimentAnalysis = () => {
                         onChange={(e)=>setUsernameState(e.target.value)}
                     />
                 </div>
-                <div>
+                <div className = "SAInput"> 
                     <label>Number of Tweets: </label>
                     <input
                         type="number"
@@ -55,7 +55,7 @@ const SentimentAnalysis = () => {
                         onChange={(e)=>setNumTweetsState(e.target.value)}
                     />
                 </div>
-                <div className="button">
+                <div className="sentimentButtonContainer">
                     <input 
                         className="submitButton"
                         type= "button" 

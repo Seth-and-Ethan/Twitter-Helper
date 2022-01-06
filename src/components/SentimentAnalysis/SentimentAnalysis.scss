@@ -1,3 +1,33 @@
+/* Chrome, Safari, Edge, Opera */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Firefox */
+input[type=number] {
+  -moz-appearance: textfield;
+}
+
 .SAContainer{
-    margin: 15px 30px;
+    padding-top: 15px;
+    padding-left: 30px;
+    width: 15%;
+}
+.sentimentButtonContainer{
+    padding-top: 15px;
+    display: flex;
+}
+.SAInput{
+    display:grid;
+    padding-top: 10px;
+
+    label{
+        font-size: 18px;
+        font-weight: bold;
+    }
+    input{
+        height: 20px;
+    }
 }
