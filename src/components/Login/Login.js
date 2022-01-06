@@ -4,34 +4,24 @@ import { Redirect, Link } from 'react-router-dom';
 import './Login.scss'
 import { getRequestToken } from "../../twitterTokens";
 
-const Login = () => {
+const Login = (e) => {
 
 
     const [usernameState, setUsernameState] = useState("")
     const [passwordState, setPasswordState] = useState("")
 
-    const handleLogin = () => {
+    useEffect(() => {
+      if(checkAuth()){
+        window.location.assign('/home')
+      }
+    }, [])
 
-        // fetch(`${process.env.API_URL}/request_token`, {
-        //     method: 'GET',
-        //   })
-        //     .then(res => {
-        //       return res.json();
-        //     })
-        //     .then(res => {
-        //       console.log(res)
-        //       window.location.assign(`https://api.twitter.com/oauth/authenticate?oauth_token=${res.oauth_token}`)
-        //     })
-        //     .catch(error => {
-        //       console.log(error);
-        //     })
+    const handleLogin = (e) => {
+      e.preventDefault()
 
         const formData = new FormData();
         formData.append("username", usernameState)
         formData.append("password", passwordState)
-
-        console.log(usernameState)
-        console.log(passwordState)
 
         fetch(`${process.env.API_URL}/api/login`, {
             method: 'POST',

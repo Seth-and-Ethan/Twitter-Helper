@@ -10,7 +10,8 @@ const Register = () => {
     const [passwordState, setPasswordState] = useState("")
     const [confirmPasswordState, setConfirmPasswordState] = useState("")
 
-    const handleSubmit = () => {
+    const handleSubmit = (e) => {
+        e.preventDefault()
 
         if(passwordState === confirmPasswordState && usernameState !== ''){
             const formData = new FormData();
