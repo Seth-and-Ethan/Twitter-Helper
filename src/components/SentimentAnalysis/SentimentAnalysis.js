@@ -8,6 +8,9 @@ const SentimentAnalysis = () => {
 
     const [usernameState, setUsernameState] = useState("")
     const [numTweetsState, setNumTweetsState] = useState(0)
+    const [tweets, setTweets] = useState([])
+    const [negativeTweets, setNegativeTweets] = useState([])
+    const [positiveTweets, setPositiveTweets] = useState([])
 
     const handleSubmit = () => {
         const formData = new FormData();
@@ -25,6 +28,9 @@ const SentimentAnalysis = () => {
             .then((response) => response.json())
             .then((result) => {
               console.log("Success: ", result);
+              setTweets(result.tweetsAnalyzed)
+              setNegativeTweets(result.negativeTweets)
+              setPositiveTweets(result.positiveTweets)
             })
             .catch((error) => {
               console.error("Error: ", error);
@@ -63,7 +69,30 @@ const SentimentAnalysis = () => {
                         onClick={handleSubmit}
                     />
                 </div>
-
+            </div>
+            <div className= "tweetContainer">
+              <h2>Tweets</h2>
+              <div className = "tweets">
+              {tweets.map((tweet, index) => (
+              <p key={index}>{tweet}</p>
+              ))}
+              </div>
+            </div>
+            <div className= "tweetContainer">
+              <h2>Positive Tweets</h2>
+              <div className = "tweets">
+              {positiveTweets.map((tweet, index) => (
+              <p key={index}>{tweet}</p>
+              ))}
+              </div>
+            </div>
+            <div className= "tweetContainer">
+              <h2>Negative Tweets</h2>
+              <div className = "tweets">
+              {negativeTweets.map((tweet, index) => (
+              <p key={index}>{tweet}</p>
+              ))}
+              </div>
             </div>
         </div>
     );

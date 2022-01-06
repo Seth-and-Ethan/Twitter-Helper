@@ -308,7 +308,7 @@ def tweet_endpoint():
       print(tweets)
 
     dataToReturn = {
-      "tweetsAnalyized": tweetList,
+      "tweetsAnalyzed": tweetList,
       "positiveTweets": positiveTweets,
       "negativeTweets": negativeTweets
     }
