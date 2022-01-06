@@ -33,6 +33,7 @@ def cleanTweet(tweet):
     tweet = re.sub("@[A-Za-z0-9]+","",tweet) #Remove @ sign
     tweet = re.sub(r"(?:\@|http?\://|https?\://|www)\S+", "", tweet)
     tweet = re.sub(r'#', '', tweet)
+    tweet = re.sub(r"RT", '', tweet)
 
     tweet_tokens = word_tokenize(tweet)
     clean_tweet_tokens = []

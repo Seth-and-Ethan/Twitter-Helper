@@ -140,7 +140,7 @@ def token_required(func):
     return func(*args, **kwargs)
 
   return decorated
-  
+
 @app.route('/', methods=['GET'])
 def index():
   return "This returns something."
@@ -211,6 +211,7 @@ def home_endpoint():
   twitter_access_token = decodedToken['oauth']
   twitter_access_token_secret = decodedToken['oauthsecret']
   auth.set_access_token(twitter_access_token, twitter_access_token_secret)
+  twitterAPI = tw.API(auth)
 
   if request.method == 'GET':
 
