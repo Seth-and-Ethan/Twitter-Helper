@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { checkAuth, setAuth } from '../../verifyLogin';
 import { Redirect } from 'react-router-dom';
 import NavBar from "../navBar/Navbar";
+import "./SentimentAnalysis.scss"
 
 const SentimentAnalysis = () => {
 
@@ -24,7 +25,6 @@ const SentimentAnalysis = () => {
             .then((response) => response.json())
             .then((result) => {
               console.log("Success: ", result);
-              alert("Thank you!")
             })
             .catch((error) => {
               console.error("Error: ", error);

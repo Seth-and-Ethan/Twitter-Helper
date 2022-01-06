@@ -6,6 +6,7 @@ from os.path import exists
 from sentiment import cleanTweet
 from makeModel import makeModel
 import nltk
+from nltk import classify
 from flask import Flask, request, session, json, make_response, jsonify
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
@@ -41,7 +42,7 @@ TWITTER_REQUEST_TOKEN_URL = "https://api.twitter.com/oauth/request_token"
 TWITTER_ACCESS_TOKEN_URL = "https://api.twitter.com/oauth/access_token"
 
 auth = tw.OAuthHandler(keys.twitter_consumer_key, keys.twitter_consumer_secret_key)
-auth.set_access_token(keys.twitter_access_token, keys.twitter_access_token_secret)
+# auth.set_access_token(keys.twitter_access_token, keys.twitter_access_token_secret)
 twitterAPI = tw.API(auth, wait_on_rate_limit=True)
 
 db = SQLAlchemy(app)
@@ -76,6 +77,7 @@ def request_oauth_token():
         request_token = str.split(data.text, '&')
         oauth_token = str.split(request_token[0], '=')[1]
         oauth_callback_confirmed = str.split(request_token[2], '=')[1]
+        print('success')
         return {
             "oauth_token": oauth_token,
             "oauth_callback_confirmed": oauth_callback_confirmed,
@@ -104,7 +106,7 @@ def request_access_token():
 
     if userInfo:
       userInfo.oauth = access_token_key
-      userInfo.oauth = access_token_secret
+      userInfo.oauthsecret = access_token_secret
       db.session.commit()
     else:
       newUserInfo = Userinfo(usercredentials_username = username, oauth = access_token_key, oauthsecret = access_token_secret)
@@ -118,6 +120,7 @@ def request_access_token():
           'oauthsecret': access_token_secret,
           }, app.config['SECRET_KEY'])
 
+    print(token)
     return {'token': token}
 
 def jsonify_tweepy(tweepy_object):
@@ -137,8 +140,7 @@ def token_required(func):
     return func(*args, **kwargs)
 
   return decorated
-
-
+  
 @app.route('/', methods=['GET'])
 def index():
   return "This returns something."
@@ -202,18 +204,6 @@ def login_endpoint():
 
     return make_response('Unable to verify', 403, {'WWW-Authenticate': 'Basic realm: "Authentication failed!"'})
 
-
-# @app.route('/api/userinfotest', methods=['GET'])
-# def userinfo_test_endpoint():
-#   # newUserInfo = Userinfo(usercredentials_username = "seth", twitterhandle = "Test2", )
-#   # db.session.merge(newUserInfo)
-#   # db.session.commit()
-
-#   newTwitterData = Twitterdata(userinfo_ID = 9, numTweet = 1, numFollower = 5, numFollowing = 5, dateRecorded = datetime.now())
-#   db.session.merge(newTwitterData)
-#   db.session.commit()
-#   return "success"
-
 @app.route('/api/home', methods=['GET'])
 def home_endpoint():
   token = request.values.get('token')
@@ -236,6 +226,7 @@ def home_endpoint():
       try:
         twitterUser = twitterAPI.me()
       except:
+        print("ERROR")
         return make_response("Username doesn't exist!", 403)
 
       dataToReturn['handle'] = twitterUser.screen_name
@@ -281,8 +272,8 @@ def tweet_endpoint():
   except:
     return jsonify({'Alert!': 'Error somewhere!'}), 400
 
-  if not userID == '' and numTweets > 0:
-    tweets = twitterAPI.user_timeline(user_id=userID, 
+  if not userID == '' and numTweets > 0 and numTweets <= 200:
+    tweets = twitterAPI.user_timeline(screen_name=userID, 
                             # 200 is the maximum allowed count
                             count=numTweets,
                             include_rts = True,
@@ -290,8 +281,6 @@ def tweet_endpoint():
                             # otherwise only the first 140 words are extracted
                             tweet_mode = 'extended'
                             )
-
-    
 
     tweetList = []
     tweetTokenList = []
@@ -317,7 +306,12 @@ def tweet_endpoint():
     for tweets in negativeTweets:
       print(tweets)
 
-    return json.dumps(tweetList)
+    dataToReturn = {
+      "positiveTweets": positiveTweets,
+      "negativeTweets": negativeTweets
+    }
+
+    return json.dumps(dataToReturn)
   else:
     return jsonify({'Alert!': 'Error somewhere!'}), 400
 

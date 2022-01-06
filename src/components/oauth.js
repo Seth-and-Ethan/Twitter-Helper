@@ -12,8 +12,7 @@ const oauths = () => {
 
         const oauth = urlParams.get('oauth_token')
         const oauthVerifier = urlParams.get('oauth_verifier')
-
-
+        
         const formData = new FormData();
         formData.append("oauth_token", oauth)
         formData.append("oauth_verifier", oauthVerifier)
@@ -38,10 +37,9 @@ const oauths = () => {
       }, [])
 
 
-
-
     return(
         <div>
+          <p>redirecting...</p>
         </div>
     );
 }

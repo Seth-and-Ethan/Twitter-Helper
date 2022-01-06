@@ -22,6 +22,7 @@ const Home = () => {
     .then((response) => {
       if(response.status == 403){
         getRequestToken()
+        console.log("Test")
       }
       return response.json()
     })
