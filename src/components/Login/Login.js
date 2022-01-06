@@ -69,6 +69,7 @@ const Login = () => {
           <div className="title">
           <h1>Login</h1>
           </div>
+          <form onSubmit={handleLogin}>
               <div className="formbox">
               <div className= "in">
                   <label>Username:</label>
@@ -94,15 +95,19 @@ const Login = () => {
               <div className="button">
                   <input 
                       className="loginButton"
-                      type= "button" 
+                      type= "submit" 
                       value="Login"
-                      onClick={handleLogin}
                   />
               </div>
+            </form>
           </div>
           <div className="registerLink">
                 <label>Don't have an Account? Create one{'\u00A0'}</label>
                   <Link to="/register">here</Link>
+          </div>
+          <div className="GuestLink">
+                <label>or continue as guest{'\u00A0'}</label>
+                  <Link to="/guest">here</Link>
           </div>
 
       </div>
