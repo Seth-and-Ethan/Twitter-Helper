@@ -287,7 +287,10 @@ def tweet_endpoint():
     tweetTokenList = []
 
     for info in tweets:
-      tweetList.append(info._json['full_text'])
+      if 'retweeted_status' in info._json:
+        tweetList.append(info._json['retweeted_status']['full_text'])
+      else:
+        tweetList.append(info._json['full_text'])
 
     for tweet in tweetList:
       tweetTokenList.append(cleanTweet(tweet))
@@ -302,15 +305,23 @@ def tweet_endpoint():
       elif result == "pos":
         positiveTweets.append(tweetList[i])
 
-    for tweets in positiveTweets:
-      print(tweets)
-    for tweets in negativeTweets:
-      print(tweets)
+    # for tweets in positiveTweets:
+    #   print(tweets)
+    # for tweets in negativeTweets:
+    #   print(tweets)
+    percentNegative = (len(negativeTweets) / len(tweetList)) * 100
+    percentNegative = round(percentNegative, 2)
+    percentPositive = 100 - percentNegative
 
     dataToReturn = {
+      "numTweets": len(tweetList),
       "tweetsAnalyzed": tweetList,
+      "numPositive": len(positiveTweets),
       "positiveTweets": positiveTweets,
-      "negativeTweets": negativeTweets
+      "numNegative": len(negativeTweets),
+      "negativeTweets": negativeTweets,
+      "percentNegative": percentNegative,
+      "percentPositive": percentPositive
     }
 
     return json.dumps(dataToReturn)

@@ -9,10 +9,13 @@ input::-webkit-inner-spin-button {
 input[type=number] {
   -moz-appearance: textfield;
 }
+.body{
+    padding-left: 5px;
+    max-width: 1280px;
+    margin: auto;
+}
 
 .SAContainer{
-    padding-top: 15px;
-    padding-left: 30px;
     width: 15%;
 }
 .sentimentButtonContainer{
@@ -30,4 +33,43 @@ input[type=number] {
     input{
         height: 20px;
     }
+}
+
+.allTweetContainer{
+    overflow-x: hidden;
+    .tweets{
+        padding: 5px;
+        width: 1260px;
+    }
+}
+.positiveNegativeContainer{
+    margin-bottom: 30px;
+    display: flex;
+    gap: 30px;
+}
+.SATweetContainer{
+    .tweets{
+        padding: 5px;
+        width: 610px;
+    }
+}
+.tweetInfo{
+    display: flex;
+    flex-direction: row;
+    padding-top: 15px;
+    width: 100%;
+    label{
+        font-weight: bold;
+    }
+    .column1{
+        width: 50%;
+    }
+    .column2{
+        width: 50%;
+        display: flex;
+    }
+}
+.percentages{
+    display: flex;
+    gap: 40px;
 }
